@@ -153,21 +153,145 @@ function func(arg){
 ## :sunny:块级作用域
 <a href="#title">:whale2:回到目录</a><br>
 #### :mag_right:为什么需要块级作用域
++ 内层变量可能会覆盖外层变量
+```JavaScript
+var tmp =new Date();
+function f(){
+    console.log(tmp);
+    if(false){
+        var tmp = 'hello,world';
+    }
+}
+
+f();  //undefined
+```
+if代码块的外部使用外层的tmp变量,内部使用内层的tmp变量,但是,函数f执行后,输出结果为undefined,原因在于**变量提升导致内层的tmp变量覆盖了外层的tmp变量**
++ 用来计数的循环变量泄露为全局变量
+```JavaScript
+var s='hello';
+for(var i=0;i<s.length;i++){
+    console.log(s[i]);
+}
+console.log(i);  //5
+```
+变量i只用来控制循环,但是循环结束后,并没有消失,只是泄露为了全局变量
 #### :mag_right:ES6的块级作用域
+块级作用域中**外层代码块不受内层代码块的影响**
+```JavaScript
+function f1(){
+    let n=5;
+    if(true){
+        let n=10;
+    }
+    consloe.log(n);   //5
+}
+```
+块级作用域可以任意嵌套
+```javascript
+{{{{{let insane='hello,world'}}}}};
+```
+内层作用域可以定义外层作用域相同的变量
+```JavaScript
+{{{{
+    let a='hello,world';
+    {let a='hello'};
+}}}}
+```
+块级作用域的出现使立即执行匿名函数(IIFE)不需要了
+```JavaScript
+//IIFE写法
+(function(){
+    var tmp=...;
+}());
+
+//块级作用域
+{
+ let tmp=..;
+}
+```
 #### :mag_right:块级作用域和函数声明
+块级作用域和函数声明的关系:<br>
++ 允许在块级作用域内声明函数
++ 函数声明类似于var,即会提升到全局作用域或函数作用域的头部
++ 同时,函数声明还会提升到所在的块级作用域的头部
 #### :mag_right:do表达式
+do表达式使块级作用域变为表带式
+```JavaScript
+let x=do{
+    let t=f();
+    t*t+1;
+};
+```
 <p id="p3"></p>
 
 ## :sunny:cconst命令
 <a href="#title">:whale2:回到目录</a><br>
 #### :mag_right:基本用法
+const声明的变量是一个只读的变量,一旦声明,无法更改<br>
+const的作用域与let相同:只在声明的块级作用域内有效,存在暂时性死区
 #### :mag_right:本质
+const实际上不是保证变量的值不变动,而是变量指向的那个内存地址不得变
+```JavaScript
+const foo={};
+
+//为foo添加一个属性,可以成功
+foo.prop=123;
+
+//将foo指向另一个对象,就会报错
+foo={};  //报错
+```
+地址是不可变的,但对象本身是可变的,所以依然可以为其添加新属性
+```JavaScript
+const a=[];
+a.push('hello');  //可执行
+a.length=0;   //可执行
+a=['dfad'];  //报错
+```
+Object.freeze方法可以使对象冻结
+```JavaScript
+const foo=Object.freeze({});
+
+//常规模式下,下一行不起作用
+//严格模式下,该行会报错
+foo.prop=123;
+```
+将一个对象完全冻结的函数:
+```JavaScript
+var contantize = (obj)=>{
+    Object.freeze(obj);
+    Objec.keys(obj).forEach((key,i)=>{
+        if(typeof obj[key]==='object'){
+            constantize(obj[key]);
+        }
+    });
+}
+```
 #### :mag_right:ES6声明变量的6种方法
++ var 命令
++ function命令
++ let命令
++ const命令
++ import命令
++ class命令
 <p id="p4"></p>
 
 ## :sunny:顶级对象的属性
 <a href="#title">:whale2:回到目录</a><br>
+顶层对象在浏览器环境下指的是window对象,在Node环境中指的是global对象,顶层对象的属性与全局变量是等价的<br>
+ES6规定:**var命令和function命令声明的变量依然是顶层对象的属性,let,const 和class命令声明的对象不属于顶层对象的属性**
 <p id="p5"></p>
 
 ## :sunny:global对象
 <a href="#title">:whale2:回到目录</a><br>
+很难有一种方法可以在所有情况下都取得顶层对象,以下有两种方法
+```JavaScript
+//方法一
+(typeof window !=='undefined' ?window:(typeof process==='object' && typeof require === 'function' && typeof global==='object')?global:this);
+//方法二
+var getGlobal=function(){
+    if(typeof self!=='undefined'){return self;}
+    if(typeof window !== 'undefined'){return window;}
+    if(typeof global !== 'undefined'){retunr global;}
+    throw new Error('unable to locate global object');
+}
+```
