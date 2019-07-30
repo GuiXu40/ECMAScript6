@@ -128,7 +128,31 @@ let difference = new Set([...a].filter(x=>!b.has(x)));
 ## :sunny:WeakSet
 <a href="#title">:whale2:回到目录</a><br>
 #### :mag_right:含义
+与Set结构类似,但是有两个区别:<br>
+WeakSet的成员只能是对象,而不能是其他成员;WeakSet中的对象都是弱对象,即垃圾回收机制不考虑WeakSet对该对象的引用(如果其他对象不再引用该对象,那么垃圾回收机制会自动回收该对象所占用的内存)
+
 #### :mag_right:语法
+语法:
+```JavaScript
+const a=new WeakSet();
+```
+可以接收一个数组或类似数组的队形为参数(任何具备iterable接口的对象都可以作为WeakSet对象的参数)
+```JavaScript
+const a=[[1,2].[3,4]];
+const ws=new WeakSet(a);
+// {[1,2],[3,4]}
+```
+成为WeakSet的成员的是a数组的成员,而不是它本身
+```JavaScript
+const b=[3,4];
+const a=new WeakSet(b);  //报错
+```
+**WeakSet有3个方法**<br>
++ WeakSet.prototype.add(value): 添加一个新成员
++ WeakSet.prototype.delete(value): 清除指定成员
++ WeakSet.prototype.has(value): 返回一个布尔值,表示某个值是不是在实例中
+<br>
+WeakSet没有size属性,没有办法遍历其成员
 <p id="p3"></p>
 
 ## :sunny:Map
