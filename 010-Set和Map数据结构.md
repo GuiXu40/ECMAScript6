@@ -103,7 +103,26 @@ let arr=[...set];  //["red","green","blue"]
 let arr = [3,5,2,2,5,5];
 let unique=[...new Set(arr)]; //[3,5,2]
 ```
-数组的map
+数组的map和filter方法也可以用于Set
+```JavaScript
+let set =new Set([1,2,3]);
+set =new Set([...set].map(x=>x*2));
+// {2,4,6}
+```
+用Set结构实现并集,交集和差集
+```JavaScript
+let a=new Set([1,2,3]);
+let b=new Set([4,3,2]);
+
+//并集
+let union=new Set(...a,...b);
+
+//交集
+let intersect = new Set([...a].filter(x=>x.has(x)))
+
+//差集
+let difference = new Set([...a].filter(x=>!b.has(x)));
+```
 <p id="p2"></p>
 
 ## :sunny:WeakSet
