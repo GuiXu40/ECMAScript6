@@ -301,6 +301,7 @@ for(let [key,value] of map.entries(){
 ```
 Map结构的默认遍历器接口(Symbol.iterator属性)就是entries()方法<br>
 Map结构转换为数据结构最快的方法就是结合拓展运算符(...)
+
 ```JavaScript
 const map=new Map([
     [1,"one"],
@@ -311,6 +312,18 @@ const map=new Map([
 [...map.key()]  //[1,2,3]
 [...map.value()]  //['one','two','three']
 ```
+结合数组的map和filter方法,可以实现Map的遍历和过滤(**Map本身没有map和filter方法**)
+```JavaScript
+const map0=new Map();
+    .set(1,'a')
+    .set(2,'b')
+    .set(3,'c');
+const map=new Map(
+    [...map0].filter(([k,v])=>k<3)
+);
+// 产生的Map结构:{1=>'a',2=>'b'}
+```
+Map还有一个
 #### :mag_right:与其他数据结构的相互转换
 <p id="p4"></p>
 
