@@ -158,8 +158,159 @@ WeakSet没有size属性,没有办法遍历其成员
 ## :sunny:Map
 <a href="#title">:whale2:回到目录</a><br>
 #### :mag_right:含义和基本用法
+JavaScript中对象本质上是键值对的集合,但只能用作字符串作为键名,为了解决这个问题,ES6提供了Map数据结构,类似于对象,但各种类型的值(包括对象)都可以作为键
+```JavaScript
+const m = new Map();
+const o={p:'hello,world'};
+
+m.set(o,'content')
+m.get(o)  //"content"
+
+m.has(o);  //true
+m.delete(o) //true
+m.has(o)   //false
+```
+Map结构也可以接收一个数组作为参数.该数组的成员是一个个表示键值对的数组
+```JavaScript
+const m=new Map([
+    ['name','guixu'],
+    ['title','Author']
+])
+
+m.size();   //2
+m.has('name')  //true
+m.get('name')   //guixu
+m.has('title')  //true
+m.get('title')  //Author
+```
+Map构造函数接受数组作为参数,实际上执行的是下面的算法
+```JavaScript
+ const items=[
+    ['name','guixu'],
+    ['title','Author']
+ ]
+ 
+ const map = new Map();
+ 
+ items.forEach(([key,value])=>map.set(key,value));
+```
+不仅仅是数组,只要是就有iterable接口且每个成员都是**一个双元素数组的数据结构**,都可以当做Map构造参数的参数
+```JavaScript
+const set = new Set([
+    ['foo',1],
+    ['bar',2]
+]);
+const m1 = new Map(set);
+m1.get('foo');  //1
+
+const m2=new Map([['baz',3]]);
+const m3=new Map(m2);
+m3.get('baz')//3
+```
+如果对同一个键多次赋值,后面的值将覆盖前面的值,如果读取一个未知的值,则返回undefined.
+
+---
+**注意**: 只有对同一个对象的引用,Map结构才将其视为同一个键
+
+---
+```JavaScript
+const m=new Map();
+
+m.set(['a'],555);
+m.get(['a']);  //undefined
+```
+上面的set和get方法表面上是针对同一个键,实际上却是两个值,内存地址不一样,<br>
+同理,同样的值的两个实例在Map结构中被视为两个键
+```JavaScript
+const m=new Map();
+
+const k1=['a'];
+const k2=['a'];
+
+m
+ .set(k1,111)
+ .set(k2,222)
+
+m.get(k1);  //111
+m.get(k2);  //222
+```
+如果Map的键是一个简单类型的值(数字,字符串,布尔值),则只要两个值严格相等,就视为一个键,包括+0和-0,NaN也视为同一个键
+```JavaScript
+let m=new Map();
+
+m.set(-0,111);
+m.get(+0);  //111
+
+m.set(true,1);
+m.set('true',2);
+m.get(true);  //1
+
+m.set(undefined,3);
+m.set(null,4);
+m.get(undefined);  //3
+
+m.set(NaN,111);
+m.get(NaN)  //123
+```
 #### :mag_right:实例的属性和方法
++ size属性:返回Map结构的成员总量
++ set(key,value):设置key所对应的键值,然后返回整个Map结构,如果key已有其值,则被更新,set方法返回的是当前的Map对象,所以可以采用链式写法
+```JavaScript
+let map=new Map();
+  .set(1,'a')
+  .set(2,'b')
+  .set(3,'c');
+```
++ get(key):读取key对应的键值,如果没有,则返回undefined
++ has(key):返回一个布尔值,表示某个键是否在Map数据结构中
++ delete(key): 删除某个键,成功返回true,否则false
++ clear(): 清除所有成员,没有返回值
 #### :mag_right:遍历方法
+提供了3个遍历器函数和一个遍历方法
++ key():返回建名
++ value(): 返回键值
++ entries(): 返回所有成员
++ forEach(): 遍历Map所有成员
+<br>
+**Map的遍历顺序就是插入顺序**
+```JavaScript
+let map =new Map([
+    ['f','no'],
+    ['t','yes']
+]);
+
+for(let key of map.key()){
+    console.log(key);
+}
+//"f"  "t"
+
+for(let key of map.value()){
+    console.log(key);
+}
+//"no" "yes"
+
+for(let item of map.entries()){
+    console.log(item[0],item[1]);
+}
+//"f" "no"
+//"t" "yse"
+//或者
+for(let [key,value] of map.entries(){
+
+}
+```
+Map结构的默认遍历器接口(Symbol.iterator属性)就是entries()方法<br>
+Map结构转换为数据结构最快的方法就是结合拓展运算符(...)
+```JavaScript
+const map=new Map([
+    [1,"one"],
+    [2,"two"],
+    [3,three]
+]);
+
+[...map.key()]  //[1,2,3]
+[...map.value()]  //['one','two','three']
+```
 #### :mag_right:与其他数据结构的相互转换
 <p id="p4"></p>
 
