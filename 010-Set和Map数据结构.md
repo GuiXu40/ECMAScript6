@@ -323,13 +323,129 @@ const map=new Map(
 );
 // 产生的Map结构:{1=>'a',2=>'b'}
 ```
-Map还有一个
+Map还有一个forEach方法,与数组的forEach方法类似
+```JavaScript
+map.forEach(function(value,key,map){
+    console.log("key: %s,value: %s",key,value);
+});
+```
+forEach方法还可以接受第二个参数,用于绑定this
 #### :mag_right:与其他数据结构的相互转换
++ Map转为数组:最常用的方法就是扩展运算符(...)
+```JavaScript
+const myMap=new Map()
+    .set(true,7)
+    .set({foo:3},['abc']);
+[...myMap]  // [[true,7],[{foo:3},['abc']]]
+```
++ 数组转换为Map:将数组传入Map构造函数就可以
+```JavaScript
+new Map([
+    [true,7],
+    [{foo:3},['abc']]
+])
+```
++ Map转为对象:如果Map所有键都是字符串,则可以转为对象
+```JavaScript
+function strMapToObj(strMap){
+    let obj=Object.create(null);
+    for(let [k,v] of strMap){
+        obj[k]=v;
+    }
+    return obj;
+}
+
+const myMap=new Map();
+    .set('yes',true)
+    .set('no',false);
+strMapToObj(myMap);  //{yes:true,no:false}
+```
++ 对象转为Map
+```JavaScript
+function objToStrMap(obj){
+    let strMap = new Map();
+    for(let k of Object.keys(obj)){
+        strMap.set(k,obj[k]);
+    }
+    return strMap;
+}
+
+objToStrMap({yes:true,no:false});  //Map {"yes"=>true,"no"=>false}
+```
++ Map转JSON<br>
+第一种情况:Map的键名都是字符串,选择转为对象JSON
+```JavaScript
+function strMapToJson(strMap){
+    return JSON.stringify(strMapToObj(strMap));
+}
+
+let myMap = new Map().set('yes',true).set('no',false);
+strMapToJson(myMap);  //'{"yes": true,"no": false}';
+```
+另外一种情况,Map的键名有非字符串,选择转为数组JSON
+```JavaScript
+function mapToArrayJson(map){
+    return JSON.stringify([...map]);
+}
+let myMap=new Map().set(true,7).set({foo:3},['abc']);
+mapToArrayJson(myMap);
+//'[[true,7],[{"foo":3},["abc"]]]'
+```
++ JSON转为Map
+```JavaScript
+function jsonToMap(jsonStr){
+    return objToStrMap(JSON.parse(jsonStr))
+}
+```
 <p id="p4"></p>
 
 ## :sunny:WeakMap
 <a href="#title">:whale2:回到目录</a><br>
 #### :mag_right:含义
+与Map类似,但只接收对象作为键名(null除外),键名所指向的对象不计入垃圾回收机制
 #### :mag_right:WeakMap的语法
+```JavaScript
+const wm=new WeakMap()
+```
 #### :mag_right:WeakMap的示例
 #### :mag_right:WeakMap的用途
+典型应用场景就是以DOM节点作为键名的场景
+```JavaScript
+let myElement = document.getElementById('logo');
+let myWeakmap=new WeakMap();
+
+myWeakmap.set(myElement,{timesClicked:0});
+
+myElement.addEventListener('click',function(){
+    let logoData=myWeakmap.get(myElement);
+    logeData.timesClicked++;
+},false)
+```
+一旦DOM节点删除,该状态就会自动消失,不存在泄漏风险<br>
+WeakMap的另一个用处是部署私有属性
+```JavaScript
+const _counter = new WeakMap();
+const _action = new WeakMap();
+
+class Countdown {
+    constructor(counter,action){
+        _counter.set(this,counter);
+        _action.set(this,action);
+    }
+    dec() {
+        let counter = _counter.get(this);
+        if(counter<1) return;
+        counter--;
+        _counter.set(this,counter);
+        if(counter==0){
+            _action.get(this)();
+        }
+    }
+}
+
+const c=new CountDown(2,()=>console.log('DONE'));
+c.dec()
+c.dec()
+//DONE
+```
+如果删除实例,两个内部属性也会消失,不会造成内存泄漏
